@@ -30,6 +30,7 @@ SECRET_FIELDS = {
     "verification_token", "bot_token", "app_token",
     "channel_secret", "channel_access_token", "client_secret",
 }
+SECRET_LIST_FIELDS = {"api_keys"}
 
 CONFIG_DIR = Path(os.environ.get("PICOCLAW_HOME", Path.home() / ".picoclaw"))
 CONFIG_PATH = CONFIG_DIR / "config.json"
@@ -79,9 +80,34 @@ def load_config():
     if not CONFIG_PATH.exists():
         return default_config()
     try:
-        return json.loads(CONFIG_PATH.read_text())
+        data = json.loads(CONFIG_PATH.read_text())
     except Exception:
         return default_config()
+    defaults = default_config()
+    changed = False
+    for key, value in defaults.items():
+        if key not in data or data[key] in (None, {}, []):
+            data[key] = value
+            changed = True
+        elif isinstance(value, dict) and isinstance(data[key], dict):
+            for subkey, subval in value.items():
+                if subkey not in data[key]:
+                    data[key][subkey] = subval
+                    changed = True
+    for m in data.get("model_list", []):
+        if isinstance(m, dict) and "api_key" in m:
+            legacy = m.pop("api_key")
+            if legacy and not m.get("api_keys"):
+                m["api_keys"] = [legacy]
+            elif "api_keys" not in m:
+                m["api_keys"] = []
+            changed = True
+    if changed:
+        try:
+            save_config(data)
+        except Exception:
+            pass
+    return data
 
 
 def save_config(data):
@@ -89,17 +115,50 @@ def save_config(data):
     CONFIG_PATH.write_text(json.dumps(data, indent=2))
 
 
+PROVIDER_CATALOG = [
+    {"provider": "openai",      "display": "OpenAI",        "api_base": "https://api.openai.com/v1",                         "seed_model": "gpt-5.4"},
+    {"provider": "anthropic",   "display": "Anthropic",     "api_base": "https://api.anthropic.com/v1",                      "seed_model": "claude-sonnet-4.6"},
+    {"provider": "openrouter",  "display": "OpenRouter",    "api_base": "https://openrouter.ai/api/v1",                      "seed_model": "auto"},
+    {"provider": "deepseek",    "display": "DeepSeek",      "api_base": "https://api.deepseek.com/v1",                       "seed_model": "deepseek-chat"},
+    {"provider": "gemini",      "display": "Google Gemini", "api_base": "https://generativelanguage.googleapis.com/v1beta",  "seed_model": "gemini-2.0-flash-exp"},
+    {"provider": "groq",        "display": "Groq",          "api_base": "https://api.groq.com/openai/v1",                    "seed_model": "llama-3.3-70b-versatile"},
+    {"provider": "moonshot",    "display": "Moonshot",      "api_base": "https://api.moonshot.cn/v1",                        "seed_model": "moonshot-v1-8k"},
+    {"provider": "zhipu",       "display": "Zhipu (GLM)",   "api_base": "https://open.bigmodel.cn/api/paas/v4",              "seed_model": "glm-4.7"},
+    {"provider": "qwen",        "display": "Qwen",          "api_base": "https://dashscope.aliyuncs.com/compatible-mode/v1", "seed_model": "qwen-max"},
+    {"provider": "nvidia",      "display": "NVIDIA",        "api_base": "https://integrate.api.nvidia.com/v1",               "seed_model": "meta/llama-3.3-70b-instruct"},
+    {"provider": "cerebras",    "display": "Cerebras",      "api_base": "https://api.cerebras.ai/v1",                        "seed_model": "llama-3.3-70b"},
+    {"provider": "volcengine",  "display": "VolcEngine",    "api_base": "https://ark.cn-beijing.volces.com/api/v3",          "seed_model": "doubao-pro"},
+    {"provider": "byteplus",    "display": "BytePlus",      "api_base": "https://ark.ap-southeast.bytepluses.com/api/v3",    "seed_model": "doubao-pro"},
+    {"provider": "longcat",     "display": "LongCat",       "api_base": "https://api.longcat.chat/openai",                   "seed_model": "longcat-flash"},
+    {"provider": "modelscope",  "display": "ModelScope",    "api_base": "https://api-inference.modelscope.cn/v1",            "seed_model": "Qwen/Qwen2.5-72B-Instruct"},
+    {"provider": "ollama",      "display": "Ollama",        "api_base": "http://localhost:11434/v1",                         "seed_model": "llama3.3"},
+    {"provider": "lmstudio",    "display": "LM Studio",     "api_base": "http://localhost:1234/v1",                          "seed_model": "openai/gpt-oss-20b"},
+]
+
+DEFAULT_PROVIDERS = {"openai", "anthropic", "openrouter", "deepseek", "gemini", "groq", "moonshot", "zhipu"}
+
+
+def _seed_model_entry(p):
+    slug = p["seed_model"].replace("/", "-").replace(":", "-")
+    return {
+        "model_name": f"{p['provider']}-{slug}",
+        "model": f"{p['provider']}/{p['seed_model']}",
+        "api_base": p["api_base"],
+        "api_keys": [],
+    }
+
+
 def default_config():
     return {
+        "version": 2,
         "agents": {
             "defaults": {
                 "workspace": "~/.picoclaw/workspace",
                 "restrict_to_workspace": True,
                 "provider": "",
-                "model": "glm-4.7",
-                "max_tokens": 8192,
-                "temperature": 0.7,
-                "max_tool_iterations": 20,
+                "model_name": "",
+                "max_tokens": 32768,
+                "max_tool_iterations": 50,
             }
         },
         "channels": {
@@ -113,19 +172,8 @@ def default_config():
             "line": {"enabled": False, "channel_secret": "", "channel_access_token": "", "webhook_host": "0.0.0.0", "webhook_port": 18791, "webhook_path": "/webhook/line", "allow_from": []},
             "maixcam": {"enabled": False, "host": "0.0.0.0", "port": 18790, "allow_from": []},
         },
-        "providers": {
-            "anthropic": {"api_key": ""},
-            "openai": {"api_key": "", "api_base": ""},
-            "openrouter": {"api_key": ""},
-            "deepseek": {"api_key": ""},
-            "groq": {"api_key": ""},
-            "gemini": {"api_key": ""},
-            "zhipu": {"api_key": "", "api_base": ""},
-            "vllm": {"api_key": "", "api_base": ""},
-            "nvidia": {"api_key": "", "api_base": ""},
-            "moonshot": {"api_key": ""},
-        },
-        "gateway": {"host": "0.0.0.0", "port": 18790},
+        "model_list": [_seed_model_entry(p) for p in PROVIDER_CATALOG if p["provider"] in DEFAULT_PROVIDERS],
+        "gateway": {"host": "0.0.0.0", "port": 18790, "hot_reload": False},
         "tools": {
             "web": {
                 "brave": {"enabled": False, "api_key": "", "max_results": 5},
@@ -137,12 +185,20 @@ def default_config():
     }
 
 
+def _mask_str(v):
+    if not isinstance(v, str) or not v:
+        return v
+    return v[:8] + "***" if len(v) > 8 else "***"
+
+
 def mask_secrets(data, _path=""):
     if isinstance(data, dict):
         result = {}
         for k, v in data.items():
             if k in SECRET_FIELDS and isinstance(v, str) and v:
-                result[k] = v[:8] + "***" if len(v) > 8 else "***"
+                result[k] = _mask_str(v)
+            elif k in SECRET_LIST_FIELDS and isinstance(v, list):
+                result[k] = [_mask_str(x) for x in v]
             else:
                 result[k] = mask_secrets(v, f"{_path}.{k}")
         return result
@@ -151,12 +207,35 @@ def mask_secrets(data, _path=""):
     return data
 
 
+def _build_model_lookup(model_list):
+    return {m["model_name"]: m for m in model_list if isinstance(m, dict) and "model_name" in m}
+
+
 def merge_secrets(new_data, existing_data):
     if isinstance(new_data, dict) and isinstance(existing_data, dict):
         result = {}
         for k, v in new_data.items():
             if k in SECRET_FIELDS and isinstance(v, str) and (v.endswith("***") or v == ""):
                 result[k] = existing_data.get(k, "")
+            elif k in SECRET_LIST_FIELDS and isinstance(v, list):
+                existing_list = existing_data.get(k, []) or []
+                merged = []
+                for i, item in enumerate(v):
+                    if isinstance(item, str) and item.endswith("***") and i < len(existing_list):
+                        merged.append(existing_list[i])
+                    elif isinstance(item, str) and item:
+                        merged.append(item)
+                result[k] = merged
+            elif k == "model_list" and isinstance(v, list):
+                existing_lookup = _build_model_lookup(existing_data.get("model_list", []))
+                merged_list = []
+                for item in v:
+                    if isinstance(item, dict):
+                        existing_item = existing_lookup.get(item.get("model_name"), {})
+                        merged_list.append(merge_secrets(item, existing_item))
+                    else:
+                        merged_list.append(item)
+                result[k] = merged_list
             else:
                 result[k] = merge_secrets(v, existing_data.get(k, {}))
         return result
@@ -178,7 +257,7 @@ class GatewayManager:
         self.state = "starting"
         try:
             self.process = await asyncio.create_subprocess_exec(
-                "picoclaw", "gateway",
+                "picoclaw", "gateway", "--allow-empty",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.STDOUT,
             )
@@ -247,7 +326,7 @@ async def homepage(request: Request):
     auth_err = require_auth(request)
     if auth_err:
         return auth_err
-    return templates.TemplateResponse(request, "index.html")
+    return templates.TemplateResponse(request, "index.html", {"provider_catalog": PROVIDER_CATALOG})
 
 
 async def health(request: Request):
@@ -295,9 +374,11 @@ async def api_status(request: Request):
 
     config = load_config()
 
-    providers = {}
-    for name, prov in config.get("providers", {}).items():
-        providers[name] = {"configured": bool(prov.get("api_key"))}
+    models = {}
+    for m in config.get("model_list", []):
+        if isinstance(m, dict) and "model_name" in m:
+            configured = bool(m.get("api_key")) or bool([k for k in (m.get("api_keys") or []) if k])
+            models[m["model_name"]] = {"configured": configured}
 
     channels = {}
     for name, chan in config.get("channels", {}).items():
@@ -314,7 +395,7 @@ async def api_status(request: Request):
 
     return JSONResponse({
         "gateway": gateway.get_status(),
-        "providers": providers,
+        "models": models,
         "channels": channels,
         "cron": {"count": len(cron_jobs), "jobs": cron_jobs},
     })
@@ -354,11 +435,10 @@ async def api_gateway_restart(request: Request):
 @asynccontextmanager
 async def lifespan(app):
     config = load_config()
-    has_key = False
-    for prov in config.get("providers", {}).values():
-        if isinstance(prov, dict) and prov.get("api_key"):
-            has_key = True
-            break
+    has_key = any(
+        isinstance(m, dict) and (m.get("api_key") or any(m.get("api_keys") or []))
+        for m in config.get("model_list", [])
+    )
     if has_key:
         asyncio.create_task(gateway.start())
     try:

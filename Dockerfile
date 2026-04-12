@@ -7,14 +7,13 @@ WORKDIR /src
 ARG PICOCLAW_VERSION=main
 
 RUN git clone --depth 1 --branch ${PICOCLAW_VERSION} https://github.com/sipeed/picoclaw.git .
+
 RUN go mod download
 RUN make build
 
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl ca-certificates git && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates git && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /src/build/picoclaw /usr/local/bin/picoclaw
 
