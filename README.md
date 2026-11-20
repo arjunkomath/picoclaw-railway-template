@@ -12,7 +12,8 @@ This repo packages **PicoClaw** for Railway with a web-based configuration UI an
 ## How it works
 
 - The container builds PicoClaw from source and runs a Python web server alongside it
-- The web server provides a configuration editor that reads/writes `~/.picoclaw/config.json` directly
+- The web server provides a configuration editor for PicoClaw's config (schema v3): settings go to `~/.picoclaw/config.json` and credentials (API keys, bot tokens) to `~/.picoclaw/.security.yml`, the same split PicoClaw itself uses
+- Configs from older template versions are migrated automatically on startup
 - On startup, if any provider API key is configured, the gateway starts automatically
 - The gateway subprocess output is captured into a 500-line log buffer viewable from the Status tab
 
@@ -22,7 +23,7 @@ This repo packages **PicoClaw** for Railway with a web-based configuration UI an
 |----------|---------|-------------|
 | `ADMIN_USERNAME` | `admin` | Username for Basic Auth |
 | `ADMIN_PASSWORD` | *(auto-generated)* | Password for Basic Auth. **Check deploy logs for the generated password if not set.** |
-| `PICOCLAW_VERSION` | `main` | Git branch/tag to build PicoClaw from |
+| `PICOCLAW_VERSION` | `v0.3.1` | Git tag/branch to build PicoClaw from (build arg). Pinned to a tested release; newer versions may change the config schema |
 
 ## Getting chat tokens
 
@@ -68,7 +69,7 @@ A: Check the deploy logs in Railway. The password is printed at startup: `Genera
 
 **Q: How do I change the AI model?**
 
-A: Go to the Configuration tab → Agent Defaults → Model field. Set it to `provider/model-name` format (e.g., `anthropic/claude-opus-4-5`, `openai/gpt-4.1`).
+A: Go to the Configuration tab → Agent Defaults → Model field. Pick any model from the Providers list. To add one, open a provider, click **+ Add model**, and enter a display name and the provider's model ID (e.g. `claude-opus-4-5`, `gpt-4.1`).
 
 **Q: The gateway isn't starting. What should I check?**
 

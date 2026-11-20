@@ -160,7 +160,7 @@
                         </div>
                         <div>
                           <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Model ID</label>
-                          <input type="text" x-model="newModelId" :placeholder="group.provider + '/model-name'"
+                          <input type="text" x-model="newModelId" placeholder="e.g. gpt-4o-mini"
                                  class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-1.5 text-sm outline-none">
                         </div>
                         <div class="flex gap-2 pt-1">
@@ -172,7 +172,7 @@
                       </div>
                     </template>
                     <button x-show="addingModelTo !== group.provider"
-                            @click="addingModelTo = group.provider; newModelName = ''; newModelId = group.provider + '/'"
+                            @click="addingModelTo = group.provider; newModelName = ''; newModelId = ''"
                             class="mt-2 text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors">
                       + Add model
                     </button>
@@ -225,8 +225,8 @@
               <span class="text-sm font-medium font-display">Telegram</span>
               <div class="flex items-center gap-3">
                 <span class="text-[11px] px-1.5 py-0.5 rounded font-medium"
-                      :class="config.channels.telegram.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
-                      x-text="config.channels.telegram.enabled ? 'On' : 'Off'"></span>
+                      :class="config.channel_list.telegram.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
+                      x-text="config.channel_list.telegram.enabled ? 'On' : 'Off'"></span>
                 <svg class="w-4 h-4 text-stone-400 transition-transform duration-200" :class="openChannel === 'telegram' && 'rotate-180'"
                      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
               </div>
@@ -234,20 +234,20 @@
             <div x-show="openChannel === 'telegram'" x-collapse>
               <div class="px-4 pb-4 pt-2 space-y-3 border-t border-stone-100 dark:border-stone-800/60 bg-stone-50 dark:bg-stone-900/40">
                 <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channels.telegram.enabled">
+                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channel_list.telegram.enabled">
                   <span class="text-sm text-stone-600 dark:text-stone-400">Enable Telegram</span>
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Bot Token</label>
                     <input type="password" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           x-model="config.channels.telegram.token" placeholder="Token from @BotFather">
+                           x-model="config.channel_list.telegram.settings.token" placeholder="Token from @BotFather">
                   </div>
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Allowed Users</label>
                     <input type="text" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           :value="(config.channels.telegram.allow_from || []).join(', ')"
-                           @input="config.channels.telegram.allow_from = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                           :value="(config.channel_list.telegram.allow_from || []).join(', ')"
+                           @input="config.channel_list.telegram.allow_from = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
                            placeholder="Comma-separated user IDs">
                   </div>
                 </div>
@@ -262,8 +262,8 @@
               <span class="text-sm font-medium font-display">Discord</span>
               <div class="flex items-center gap-3">
                 <span class="text-[11px] px-1.5 py-0.5 rounded font-medium"
-                      :class="config.channels.discord.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
-                      x-text="config.channels.discord.enabled ? 'On' : 'Off'"></span>
+                      :class="config.channel_list.discord.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
+                      x-text="config.channel_list.discord.enabled ? 'On' : 'Off'"></span>
                 <svg class="w-4 h-4 text-stone-400 transition-transform duration-200" :class="openChannel === 'discord' && 'rotate-180'"
                      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
               </div>
@@ -271,20 +271,20 @@
             <div x-show="openChannel === 'discord'" x-collapse>
               <div class="px-4 pb-4 pt-2 space-y-3 border-t border-stone-100 dark:border-stone-800/60 bg-stone-50 dark:bg-stone-900/40">
                 <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channels.discord.enabled">
+                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channel_list.discord.enabled">
                   <span class="text-sm text-stone-600 dark:text-stone-400">Enable Discord</span>
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Bot Token</label>
                     <input type="password" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           x-model="config.channels.discord.token" placeholder="Token from Developer Portal">
+                           x-model="config.channel_list.discord.settings.token" placeholder="Token from Developer Portal">
                   </div>
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Allowed Users</label>
                     <input type="text" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           :value="(config.channels.discord.allow_from || []).join(', ')"
-                           @input="config.channels.discord.allow_from = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                           :value="(config.channel_list.discord.allow_from || []).join(', ')"
+                           @input="config.channel_list.discord.allow_from = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
                            placeholder="Comma-separated user IDs">
                   </div>
                 </div>
@@ -299,8 +299,8 @@
               <span class="text-sm font-medium font-display">Slack</span>
               <div class="flex items-center gap-3">
                 <span class="text-[11px] px-1.5 py-0.5 rounded font-medium"
-                      :class="config.channels.slack.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
-                      x-text="config.channels.slack.enabled ? 'On' : 'Off'"></span>
+                      :class="config.channel_list.slack.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
+                      x-text="config.channel_list.slack.enabled ? 'On' : 'Off'"></span>
                 <svg class="w-4 h-4 text-stone-400 transition-transform duration-200" :class="openChannel === 'slack' && 'rotate-180'"
                      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
               </div>
@@ -308,19 +308,19 @@
             <div x-show="openChannel === 'slack'" x-collapse>
               <div class="px-4 pb-4 pt-2 space-y-3 border-t border-stone-100 dark:border-stone-800/60 bg-stone-50 dark:bg-stone-900/40">
                 <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channels.slack.enabled">
+                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channel_list.slack.enabled">
                   <span class="text-sm text-stone-600 dark:text-stone-400">Enable Slack</span>
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Bot Token</label>
                     <input type="password" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           x-model="config.channels.slack.bot_token" placeholder="xoxb-...">
+                           x-model="config.channel_list.slack.settings.bot_token" placeholder="xoxb-...">
                   </div>
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">App Token</label>
                     <input type="password" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           x-model="config.channels.slack.app_token" placeholder="xapp-...">
+                           x-model="config.channel_list.slack.settings.app_token" placeholder="xapp-...">
                   </div>
                 </div>
               </div>
@@ -334,8 +334,8 @@
               <span class="text-sm font-medium font-display">WhatsApp</span>
               <div class="flex items-center gap-3">
                 <span class="text-[11px] px-1.5 py-0.5 rounded font-medium"
-                      :class="config.channels.whatsapp.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
-                      x-text="config.channels.whatsapp.enabled ? 'On' : 'Off'"></span>
+                      :class="config.channel_list.whatsapp.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
+                      x-text="config.channel_list.whatsapp.enabled ? 'On' : 'Off'"></span>
                 <svg class="w-4 h-4 text-stone-400 transition-transform duration-200" :class="openChannel === 'whatsapp' && 'rotate-180'"
                      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
               </div>
@@ -343,20 +343,20 @@
             <div x-show="openChannel === 'whatsapp'" x-collapse>
               <div class="px-4 pb-4 pt-2 space-y-3 border-t border-stone-100 dark:border-stone-800/60 bg-stone-50 dark:bg-stone-900/40">
                 <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channels.whatsapp.enabled">
+                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channel_list.whatsapp.enabled">
                   <span class="text-sm text-stone-600 dark:text-stone-400">Enable WhatsApp</span>
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Bridge URL</label>
                     <input type="text" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           x-model="config.channels.whatsapp.bridge_url" placeholder="ws://localhost:3001">
+                           x-model="config.channel_list.whatsapp.settings.bridge_url" placeholder="ws://localhost:3001">
                   </div>
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Allowed Numbers</label>
                     <input type="text" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           :value="(config.channels.whatsapp.allow_from || []).join(', ')"
-                           @input="config.channels.whatsapp.allow_from = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                           :value="(config.channel_list.whatsapp.allow_from || []).join(', ')"
+                           @input="config.channel_list.whatsapp.allow_from = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
                            placeholder="Comma-separated numbers">
                   </div>
                 </div>
@@ -371,8 +371,8 @@
               <span class="text-sm font-medium font-display">Feishu</span>
               <div class="flex items-center gap-3">
                 <span class="text-[11px] px-1.5 py-0.5 rounded font-medium"
-                      :class="config.channels.feishu.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
-                      x-text="config.channels.feishu.enabled ? 'On' : 'Off'"></span>
+                      :class="config.channel_list.feishu.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
+                      x-text="config.channel_list.feishu.enabled ? 'On' : 'Off'"></span>
                 <svg class="w-4 h-4 text-stone-400 transition-transform duration-200" :class="openChannel === 'feishu' && 'rotate-180'"
                      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
               </div>
@@ -380,29 +380,29 @@
             <div x-show="openChannel === 'feishu'" x-collapse>
               <div class="px-4 pb-4 pt-2 space-y-3 border-t border-stone-100 dark:border-stone-800/60 bg-stone-50 dark:bg-stone-900/40">
                 <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channels.feishu.enabled">
+                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channel_list.feishu.enabled">
                   <span class="text-sm text-stone-600 dark:text-stone-400">Enable Feishu</span>
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">App ID</label>
                     <input type="text" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           x-model="config.channels.feishu.app_id">
+                           x-model="config.channel_list.feishu.settings.app_id">
                   </div>
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">App Secret</label>
                     <input type="password" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           x-model="config.channels.feishu.app_secret">
+                           x-model="config.channel_list.feishu.settings.app_secret">
                   </div>
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Encrypt Key</label>
                     <input type="password" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           x-model="config.channels.feishu.encrypt_key">
+                           x-model="config.channel_list.feishu.settings.encrypt_key">
                   </div>
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Verification Token</label>
                     <input type="password" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           x-model="config.channels.feishu.verification_token">
+                           x-model="config.channel_list.feishu.settings.verification_token">
                   </div>
                 </div>
               </div>
@@ -416,8 +416,8 @@
               <span class="text-sm font-medium font-display">DingTalk</span>
               <div class="flex items-center gap-3">
                 <span class="text-[11px] px-1.5 py-0.5 rounded font-medium"
-                      :class="config.channels.dingtalk.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
-                      x-text="config.channels.dingtalk.enabled ? 'On' : 'Off'"></span>
+                      :class="config.channel_list.dingtalk.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
+                      x-text="config.channel_list.dingtalk.enabled ? 'On' : 'Off'"></span>
                 <svg class="w-4 h-4 text-stone-400 transition-transform duration-200" :class="openChannel === 'dingtalk' && 'rotate-180'"
                      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
               </div>
@@ -425,19 +425,19 @@
             <div x-show="openChannel === 'dingtalk'" x-collapse>
               <div class="px-4 pb-4 pt-2 space-y-3 border-t border-stone-100 dark:border-stone-800/60 bg-stone-50 dark:bg-stone-900/40">
                 <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channels.dingtalk.enabled">
+                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channel_list.dingtalk.enabled">
                   <span class="text-sm text-stone-600 dark:text-stone-400">Enable DingTalk</span>
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Client ID</label>
                     <input type="text" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           x-model="config.channels.dingtalk.client_id">
+                           x-model="config.channel_list.dingtalk.settings.client_id">
                   </div>
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Client Secret</label>
                     <input type="password" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           x-model="config.channels.dingtalk.client_secret">
+                           x-model="config.channel_list.dingtalk.settings.client_secret">
                   </div>
                 </div>
               </div>
@@ -451,8 +451,8 @@
               <span class="text-sm font-medium font-display">LINE</span>
               <div class="flex items-center gap-3">
                 <span class="text-[11px] px-1.5 py-0.5 rounded font-medium"
-                      :class="config.channels.line.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
-                      x-text="config.channels.line.enabled ? 'On' : 'Off'"></span>
+                      :class="config.channel_list.line.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'"
+                      x-text="config.channel_list.line.enabled ? 'On' : 'Off'"></span>
                 <svg class="w-4 h-4 text-stone-400 transition-transform duration-200" :class="openChannel === 'line' && 'rotate-180'"
                      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
               </div>
@@ -460,19 +460,19 @@
             <div x-show="openChannel === 'line'" x-collapse>
               <div class="px-4 pb-4 pt-2 space-y-3 border-t border-stone-100 dark:border-stone-800/60 bg-stone-50 dark:bg-stone-900/40">
                 <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channels.line.enabled">
+                  <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.channel_list.line.enabled">
                   <span class="text-sm text-stone-600 dark:text-stone-400">Enable LINE</span>
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Channel Secret</label>
                     <input type="password" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           x-model="config.channels.line.channel_secret">
+                           x-model="config.channel_list.line.settings.channel_secret">
                   </div>
                   <div>
                     <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Channel Access Token</label>
                     <input type="password" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                           x-model="config.channels.line.channel_access_token">
+                           x-model="config.channel_list.line.settings.channel_access_token">
                   </div>
                 </div>
               </div>
@@ -490,7 +490,8 @@
             <div>
               <label class="block text-xs text-stone-500 dark:text-stone-400 mb-1">Brave Search API Key</label>
               <input type="password" class="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded px-3 py-2 text-sm outline-none"
-                     x-model="config.tools.web.brave.api_key" placeholder="Enter Brave Search API key">
+                     :value="(config.tools.web.brave.api_keys || [])[0] || ''"
+                     @input="setBraveKey($event.target.value)" placeholder="Enter Brave Search API key">
             </div>
             <div class="flex items-center gap-2 self-end pb-2">
               <input type="checkbox" class="rounded bg-stone-100 border-stone-300 dark:bg-stone-800 dark:border-stone-600 accent-amber-600" x-model="config.tools.web.duckduckgo.enabled">
@@ -646,7 +647,7 @@
         get providerGroups() {
           const groups = {};
           (this.config.model_list || []).forEach((m, idx) => {
-            const provider = (m.model || '').split('/')[0];
+            const provider = modelProvider(m);
             if (!provider) return;
             const key = (m.api_keys && m.api_keys[0]) || '';
             if (!groups[provider]) {
@@ -682,7 +683,8 @@
           const slug = p.seed_model.replace(/[\/:]/g, '-');
           this.config.model_list.push({
             model_name: `${p.provider}-${slug}`,
-            model: `${p.provider}/${p.seed_model}`,
+            provider: p.provider,
+            model: p.seed_model,
             api_base: p.api_base,
             api_keys: [],
           });
@@ -709,15 +711,25 @@
         addModelToProvider(group) {
           if (!this.newModelName.trim() || !this.newModelId.trim()) return;
           const existing = this.config.model_list[group.indices[0]];
+          let modelId = this.newModelId.trim();
+          if (modelId.startsWith(group.provider + '/')) modelId = modelId.slice(group.provider.length + 1);
+          if (!modelId) return;
           this.config.model_list.push({
             model_name: this.newModelName.trim(),
-            model: this.newModelId.trim(),
+            provider: group.provider,
+            model: modelId,
             api_base: existing?.api_base || '',
             api_keys: (existing?.api_keys && existing.api_keys.length) ? [...existing.api_keys] : [],
           });
           this.newModelName = '';
-          this.newModelId = group.provider + '/';
+          this.newModelId = '';
           this.addingModelTo = null;
+        },
+
+        setBraveKey(value) {
+          const brave = this.config.tools.web.brave;
+          brave.api_keys = value ? [value] : [];
+          brave.enabled = !!value;
         },
 
         removeModel(idx) {
@@ -829,27 +841,28 @@
       };
     }
 
+    // Only the paths the UI binds to. Everything else comes from the server
+    // as-is, so nothing unknown to PicoClaw's config schema (v3) is added.
+    const UI_CHANNELS = ['telegram', 'discord', 'slack', 'whatsapp', 'feishu', 'dingtalk', 'line'];
+
     function defaultConfig() {
+      const channel_list = {};
+      UI_CHANNELS.forEach(name => {
+        channel_list[name] = { type: name, enabled: false, allow_from: [], settings: {} };
+      });
       return {
-        version: 2,
-        agents: { defaults: { workspace: '~/.picoclaw/workspace', restrict_to_workspace: true, provider: '', model_name: '', max_tokens: 32768, max_tool_iterations: 50 } },
-        channels: {
-          telegram: { enabled: false, token: '', proxy: '', allow_from: [] },
-          discord: { enabled: false, token: '', allow_from: [] },
-          slack: { enabled: false, bot_token: '', app_token: '', allow_from: [] },
-          whatsapp: { enabled: false, bridge_url: 'ws://localhost:3001', allow_from: [] },
-          feishu: { enabled: false, app_id: '', app_secret: '', encrypt_key: '', verification_token: '', allow_from: [] },
-          dingtalk: { enabled: false, client_id: '', client_secret: '', allow_from: [] },
-          qq: { enabled: false, app_id: '', app_secret: '', allow_from: [] },
-          line: { enabled: false, channel_secret: '', channel_access_token: '', webhook_host: '0.0.0.0', webhook_port: 18791, webhook_path: '/webhook/line', allow_from: [] },
-          maixcam: { enabled: false, host: '0.0.0.0', port: 18790, allow_from: [] },
-        },
+        version: 3,
+        agents: { defaults: { model_name: '', max_tokens: 32768, max_tool_iterations: 50 } },
+        channel_list,
         model_list: [],
-        gateway: { host: '0.0.0.0', port: 18790, hot_reload: false },
-        tools: { web: { brave: { enabled: false, api_key: '', max_results: 5 }, duckduckgo: { enabled: true, max_results: 5 } } },
-        heartbeat: { enabled: true, interval: 30 },
-        devices: { enabled: false, monitor_usb: false },
+        tools: { web: { brave: { enabled: false, api_keys: [] }, duckduckgo: { enabled: true } } },
       };
+    }
+
+    function modelProvider(m) {
+      if (m.provider) return m.provider;
+      const model = m.model || '';
+      return model.includes('/') ? model.split('/')[0] : '';
     }
 
     function mergeDeep(target, source) {
